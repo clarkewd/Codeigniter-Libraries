@@ -1,13 +1,14 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
+ * Author: Tim Griesser
  * This will provides support for file upload arrays
  * when provided in the format of name="userfile[]"
  */
 
 class MY_Upload extends CI_Upload {
 
-	var $current_multi_loop;
+    var $current_multi_loop;
 	var $multi_file_array;
 	var $multi_confirm;
 	var $data_array;
@@ -333,8 +334,7 @@ class MY_Upload extends CI_Upload {
 				$str .= $open.$val.$close;	
 			}
 		}
-	
+			
 		return $str;
 	}
-	
 }
