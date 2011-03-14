@@ -1,0 +1,3 @@
+MY_Upload.php - CI 1.7.3
+
+Allows for an array of file uploads without sacrificing the $this->upload->do_upload() syntax
