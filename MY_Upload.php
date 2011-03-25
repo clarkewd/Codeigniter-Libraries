@@ -1,7 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
- * Author: Tim Griesser
  * This will provides support for file upload arrays
  * when provided in the format of name="userfile[]"
  */
