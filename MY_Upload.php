@@ -1,13 +1,13 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
- * This will provides support for file upload arrays
+ * This provides support for file upload arrays
  * when provided in the format of name="userfile[]"
  */
 
 class MY_Upload extends CI_Upload {
 
-    var $current_multi_loop;
+	var $current_multi_loop = FALSE;
 	var $multi_file_array;
 	var $multi_confirm;
 	var $data_array;
@@ -19,7 +19,7 @@ class MY_Upload extends CI_Upload {
 	 * @return	bool
 	 */
 	function do_upload($field = 'userfile')
-	{
+	{	
 		// Is $_FILES[$field] set? If not, no reason to continue.
 		if ( ! isset($_FILES[$field]))
 		{
@@ -43,7 +43,6 @@ class MY_Upload extends CI_Upload {
 				$i = 0;
 		        foreach ($v as $item)
 		        {
-					$this->current_multi_loop = $k;
 					$this->multi_file_array[$i][$k] = $item;
 					$i++;
 				}
@@ -52,10 +51,12 @@ class MY_Upload extends CI_Upload {
 		    for ($i=0;$i<count($this->multi_file_array);$i++)
 		    {
 		        $_FILES[$field] = $this->multi_file_array[$i];
-		
-				$r[] = $this->do_upload($field);
-
-				$this->data_array[$i] = $this->data(FALSE);
+				$this->current_multi_loop = $i;				
+				$r[$i] = $this->do_upload($field);
+				if ($r[$i] === TRUE)
+				{
+					$this->data_array[$i] = $this->data(TRUE);					
+				}
 			}
 			
 			return (in_array(TRUE, $r) ? TRUE : FALSE);
@@ -230,7 +231,33 @@ class MY_Upload extends CI_Upload {
 	 */	
 	function data($in = FALSE)
 	{
-		if ($in === TRUE OR empty($this->multi_file_array))
+		if ($this->current_multi_loop !== FALSE)
+		{
+			if($in === TRUE)
+			{
+				return array (
+								'file_name'			=> $this->file_name,
+								'file_type'			=> $this->file_type,
+								'file_path'			=> $this->upload_path,
+								'full_path'			=> $this->upload_path.$this->file_name,
+								'raw_name'			=> str_replace($this->file_ext, '', $this->file_name),
+								'orig_name'			=> $this->orig_name,
+								'client_name'		=> $this->client_name,
+								'file_ext'			=> $this->file_ext,
+								'file_size'			=> $this->file_size,
+								'is_image'			=> $this->is_image(),
+								'image_width'		=> $this->image_width,
+								'image_height'		=> $this->image_height,
+								'image_type'		=> $this->image_type,
+								'image_size_str'	=> $this->image_size_str
+							);
+			}
+			else
+			{
+				return $this->data_array;
+			}
+		}
+		else
 		{
 			return array (
 							'file_name'			=> $this->file_name,
@@ -246,12 +273,8 @@ class MY_Upload extends CI_Upload {
 							'image_width'		=> $this->image_width,
 							'image_height'		=> $this->image_height,
 							'image_type'		=> $this->image_type,
-							'image_size_str'	=> $this->image_size_str,
+							'image_size_str'	=> $this->image_size_str
 						);
-		}
-		else
-		{
-			return $this->multi_file_array;
 		}
 	}
 
@@ -291,7 +314,7 @@ class MY_Upload extends CI_Upload {
 		}
 		else
 		{
-			if (empty($this->current_multi_loop))
+			if ($this->current_multi_loop === FALSE)
 			{
 				$msg = ($CI->lang->line($msg) == FALSE) ? $msg : $CI->lang->line($msg);
 				$this->error_msg[] = $msg;
@@ -321,7 +344,7 @@ class MY_Upload extends CI_Upload {
 		$str = '';
 		foreach ($this->error_msg as $val)
 		{
-			if (is_array($val))
+			if(is_array($val))
 			{
 				foreach($val as $multi)
 				{
@@ -333,7 +356,8 @@ class MY_Upload extends CI_Upload {
 				$str .= $open.$val.$close;	
 			}
 		}
-			
+	
 		return $str;
 	}
+	
 }
